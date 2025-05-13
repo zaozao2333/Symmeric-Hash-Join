@@ -1946,11 +1946,21 @@ typedef struct HashJoinState
 	List	   *hj_OuterHashKeys;	/* list of ExprState nodes */
 	List	   *hj_HashOperators;	/* list of operator OIDs */
 	List	   *hj_Collations;
+	HashJoinTable hj_OuterHashTable;//外表的Hash Table
+
+	List        *hj_InnerHashKeys;//内表的Hash Keys
 	HashJoinTable hj_HashTable;
+
+	uint32		hj_InnerCurHashValue;
+	int 		hj_OuterCurBucketNo;
+	int			hj_OuterCurSkewBucketNo;
+	HashJoinTuple hj_OuterCurTuple;
+
 	uint32		hj_CurHashValue;
 	int			hj_CurBucketNo;
 	int			hj_CurSkewBucketNo;
 	HashJoinTuple hj_CurTuple;
+
 	TupleTableSlot *hj_OuterTupleSlot;
 	TupleTableSlot *hj_HashTupleSlot;
 	TupleTableSlot *hj_NullOuterTupleSlot;
@@ -1958,8 +1968,10 @@ typedef struct HashJoinState
 	TupleTableSlot *hj_FirstOuterTupleSlot;
 	int			hj_JoinState;
 	bool		hj_MatchedOuter;
+	bool		hj_MatchedInner;
 	bool		hj_OuterNotEmpty;
-} HashJoinState;
+	bool		hj_InnerNotEmpty;
+ } HashJoinState;
 
 
 /* ----------------------------------------------------------------
@@ -2282,7 +2294,7 @@ typedef struct HashState
 	PlanState	ps;				/* its first field is NodeTag */
 	HashJoinTable hashtable;	/* hash table for the hashjoin */
 	List	   *hashkeys;		/* list of ExprState nodes */
-
+	
 	SharedHashInfo *shared_info;	/* one entry per worker */
 	HashInstrumentation *hinstrument;	/* this worker's entry */
 

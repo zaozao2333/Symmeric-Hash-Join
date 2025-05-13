@@ -4381,6 +4381,7 @@ create_hashjoin_plan(PlannerInfo *root,
 {
 	HashJoin   *join_plan;
 	Hash	   *hash_plan;
+	Hash	   *outer_hash_plan;//新增
 	Plan	   *outer_plan;
 	Plan	   *inner_plan;
 	List	   *tlist = build_path_tlist(root, &best_path->jpath.path);
@@ -4513,12 +4514,21 @@ create_hashjoin_plan(PlannerInfo *root,
 						  skewColumn,
 						  skewInherit);
 
+	outer_hash_plan = make_hash(outer_plan,
+								outer_hashkeys,
+								skewTable,
+								skewColumn,
+								skewInherit);//outer也hash
+
 	/*
 	 * Set Hash node's startup & total costs equal to total cost of input
 	 * plan; this only affects EXPLAIN display not decisions.
 	 */
 	copy_plan_costsize(&hash_plan->plan, inner_plan);
 	hash_plan->plan.startup_cost = hash_plan->plan.total_cost;
+
+	copy_plan_costsize(&outer_hash_plan->plan, outer_plan);
+	outer_hash_plan->plan.startup_cost = outer_hash_plan->plan.total_cost;//跟hash_plan一样
 
 	/*
 	 * If parallel-aware, the executor will also need an estimate of the total
@@ -4538,13 +4548,13 @@ create_hashjoin_plan(PlannerInfo *root,
 							  hashoperators,
 							  hashcollations,
 							  outer_hashkeys,
-							  outer_plan,
+							  (Plan *) outer_hash_plan,//outer_plan改成(Plan *)outer_hash_plan
 							  (Plan *) hash_plan,
 							  best_path->jpath.jointype,
 							  best_path->jpath.inner_unique);
 
 	copy_generic_path_info(&join_plan->join.plan, &best_path->jpath.path);
-
+	
 	return join_plan;
 }
 

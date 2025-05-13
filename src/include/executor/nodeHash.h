@@ -54,10 +54,12 @@ extern void ExecHashGetBucketAndBatch(HashJoinTable hashtable,
 									  int *bucketno,
 									  int *batchno);
 extern bool ExecScanHashBucket(HashJoinState *hjstate, ExprContext *econtext);
+extern bool ExecScanOuterHashBucket(HashJoinState *hjstate, ExprContext *econtext);
 extern bool ExecParallelScanHashBucket(HashJoinState *hjstate, ExprContext *econtext);
 extern void ExecPrepHashTableForUnmatched(HashJoinState *hjstate);
 extern bool ExecScanHashTableForUnmatched(HashJoinState *hjstate,
 										  ExprContext *econtext);
+extern bool ExecScanOuterHashTableForUnmatched(HashJoinState *hjstate,ExprContext *econtext);
 extern void ExecHashTableReset(HashJoinTable hashtable);
 extern void ExecHashTableResetMatchFlags(HashJoinTable hashtable);
 extern void ExecChooseHashTableSize(double ntuples, int tupwidth, bool useskew,
